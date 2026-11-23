@@ -154,11 +154,14 @@ async function enterApp(user, profile) {
   const tag = document.querySelector(".welcome .tag");
   if (tag) tag.textContent = "● Sistem operasional · Terhubung";
   showView("dashboard");
-  if (role === "super_admin") await renderRequests();
+  if (role === "super_admin") {
+    await renderRequests();
+    await renderPasswordResetRequests();
+  }
 }
 
 async function loadProfile(userId) {
-  const { data, error } = await db.from("profiles").select("id, full_name, username, role, approval_status, is_active").eq("id", userId).single();
+  const { data, error } = await db.from("profiles").select("id, full_name, username, role, approval_status, is_active, must_change_password").eq("id", userId).single();
   if (error) throw error;
   if (!data || data.approval_status !== "approved" || data.is_active !== true) {
     await db.auth.signOut();
@@ -182,7 +185,8 @@ $("loginForm").onsubmit = async event => {
       await db.auth.signOut();
       throw new Error("Username tidak cocok dengan profil akun.");
     }
-    await enterApp(data.user, profile);
+    const readyProfile = await enforceTemporaryPasswordChange(data.user, profile);
+    await enterApp(data.user, readyProfile);
   } catch (error) { notifyError(error, "Username atau password salah."); }
   finally { setBusy(button, false); }
 };
@@ -266,72 +270,140 @@ try {
   const { data: { session } } = await db.auth.getSession();
   if (session?.user) {
     const profile = await loadProfile(session.user.id);
-    await enterApp(session.user, profile);
+    const readyProfile = await enforceTemporaryPasswordChange(session.user, profile);
+    await enterApp(session.user, readyProfile);
   }
 } catch (error) { console.warn("Sesi tidak dipulihkan:", error.message); }
 
-// FITUR PEMULIHAN PASSWORD SUPER ADMIN
+
+// PEMULIHAN PASSWORD TANPA EMAIL
 const recoveryButton = document.createElement("button");
 recoveryButton.type = "button";
-recoveryButton.textContent = "Lupa Password Super Admin?";
+recoveryButton.textContent = "Lupa Password?";
 recoveryButton.className = "small-link";
-recoveryButton.style.marginTop = "12px";
-
-const loginForm = $("loginForm");
-loginForm.insertAdjacentElement("afterend", recoveryButton);
+recoveryButton.style.marginTop = "10px";
+$("loginForm").insertAdjacentElement("afterend", recoveryButton);
 
 recoveryButton.onclick = async () => {
-  const email = prompt(
-    "Masukkan Gmail Super Admin:",
-    "zidanegamal15@gmail.com"
-  );
-
-  if (!email) return;
-
+  const username = (prompt("Masukkan username akun yang ingin dipulihkan:") || "").trim().toLowerCase();
+  if (!username) return;
+  if (!/^[a-z0-9_]{3,30}$/.test(username)) {
+    alert("Format username tidak valid. Gunakan 3–30 huruf kecil, angka, atau garis bawah.");
+    return;
+  }
+  recoveryButton.disabled = true;
   try {
-    const { error } = await db.auth.resetPasswordForEmail(
-      email.trim(),
-      {
-        redirectTo:
-          "https://zidanegamal15-tech.github.io/PT.MEDICAL-PRIMA-UTAMA/"
-      }
-    );
-
+    const { data, error } = await db.functions.invoke("manage-users", {
+      body: { action: "submit_password_reset_request", username }
+    });
     if (error) throw error;
-
-    alert("Link pemulihan password telah dikirim ke Gmail.");
-
+    if (data?.error) throw new Error(data.error);
+    alert(data?.message || "Jika akun ditemukan, permintaan pemulihan akan diteruskan kepada Super Admin.");
   } catch (error) {
-    alert("Gagal mengirim pemulihan: " + error.message);
+    notifyError(error, "Permintaan pemulihan tidak dapat dikirim.");
+  } finally {
+    recoveryButton.disabled = false;
   }
 };
 
-// PROSES PASSWORD BARU
-db.auth.onAuthStateChange((event) => {
-  if (event === "PASSWORD_RECOVERY") {
-    setTimeout(async () => {
-      const newPassword = prompt("Masukkan password baru:");
-
-      if (!newPassword) return;
-
-      if (newPassword.length < 8) {
-        alert("Password minimal 8 karakter.");
-        return;
-      }
-
-      const { error } = await db.auth.updateUser({
-        password: newPassword
-      });
-
-      if (error) {
-        alert("Gagal memperbarui password: " + error.message);
-      } else {
-        alert("Password Super Admin berhasil diperbarui!");
-        await db.auth.signOut();
-        location.reload();
-      }
-    }, 500);
+async function renderPasswordResetRequests() {
+  if (currentProfile?.role !== "super_admin") return;
+  let panel = $("passwordResetPanel");
+  if (!panel) {
+    panel = document.createElement("section");
+    panel.id = "passwordResetPanel";
+    panel.className = "panel";
+    panel.style.marginTop = "18px";
+    panel.innerHTML = `
+      <div class="panel-head">
+        <h3>Permintaan Reset Password</h3>
+        <button class="secondary" type="button" id="refreshPasswordReset">Muat ulang</button>
+      </div>
+      <div id="passwordResetList" class="empty">Memuat permintaan...</div>`;
+    $("view-users").appendChild(panel);
+    $("refreshPasswordReset").addEventListener("click", renderPasswordResetRequests);
   }
-});
+  const list = $("passwordResetList");
+  list.className = "empty";
+  list.textContent = "Memuat permintaan...";
+  try {
+    const { data, error } = await db.functions.invoke("manage-users", {
+      body: { action: "list_password_reset_requests" }
+    });
+    if (error) throw error;
+    if (data?.error) throw new Error(data.error);
+    const requests = data?.requests || [];
+    if (!requests.length) {
+      list.className = "empty";
+      list.textContent = "Tidak ada permintaan reset password yang menunggu.";
+      return;
+    }
+    list.className = "";
+    list.innerHTML = requests.map(item => `
+      <div class="rowline">
+        <div><b>${escapeHtml(item.full_name || item.username)}</b>
+          <small>${escapeHtml(item.username)} · ${new Date(item.created_at).toLocaleString("id-ID")}</small>
+        </div>
+        <div class="actions"><button class="secondary" type="button" data-reset-user="${escapeHtml(item.id)}">Buat password sementara</button></div>
+      </div>`).join("");
+    list.querySelectorAll("[data-reset-user]").forEach(button =>
+      button.addEventListener("click", () => resetRequestedUser(button.dataset.resetUser, button))
+    );
+  } catch (error) {
+    list.className = "empty";
+    list.textContent = "Permintaan reset tidak dapat dimuat.";
+    notifyError(error, "Gagal memuat permintaan reset password.");
+  }
+}
+
+async function resetRequestedUser(requestId, button) {
+  if (currentProfile?.role !== "super_admin") return alert("Hanya Super Admin yang dapat melakukan reset password.");
+  const temporary_password = prompt("Buat password sementara (minimal 12 karakter). Berikan kepada pengguna melalui saluran yang aman:");
+  if (temporary_password === null) return;
+  if (temporary_password.length < 12) return alert("Password sementara minimal 12 karakter.");
+  setBusy(button, true, "Memproses...");
+  try {
+    const { data, error } = await db.functions.invoke("manage-users", {
+      body: { action: "admin_reset_password", request_id: requestId, temporary_password }
+    });
+    if (error) throw error;
+    if (data?.error) throw new Error(data.error);
+    alert("Password sementara berhasil dibuat. Sampaikan kepada pengguna secara aman. Pengguna wajib menggantinya saat login berikutnya.");
+    await renderPasswordResetRequests();
+  } catch (error) {
+    notifyError(error, "Reset password gagal.");
+  } finally {
+    setBusy(button, false);
+  }
+}
+
+async function enforceTemporaryPasswordChange(user, profile) {
+  if (!profile.must_change_password) return profile;
+  alert("Anda sedang menggunakan password sementara. Anda wajib mengganti password sebelum melanjutkan.");
+  while (true) {
+    const newPassword = prompt("Masukkan password baru (minimal 12 karakter):");
+    if (newPassword === null) {
+      await db.auth.signOut();
+      throw new Error("Anda keluar karena belum mengganti password sementara.");
+    }
+    if (newPassword.length < 12) {
+      alert("Password baru minimal 12 karakter.");
+      continue;
+    }
+    const confirmPassword = prompt("Ulangi password baru:");
+    if (confirmPassword === null) continue;
+    if (newPassword !== confirmPassword) {
+      alert("Konfirmasi password tidak sama. Silakan ulangi.");
+      continue;
+    }
+    const { data, error } = await db.functions.invoke("manage-users", {
+      body: { action: "complete_password_change", new_password: newPassword }
+    });
+    if (error) throw error;
+    if (data?.error) throw new Error(data.error);
+    alert("Password berhasil diganti.");
+    return { ...profile, must_change_password: false };
+  }
+}
 </script>
 </body></html>
