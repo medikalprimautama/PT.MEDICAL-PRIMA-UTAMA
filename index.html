@@ -269,5 +269,69 @@ try {
     await enterApp(session.user, profile);
   }
 } catch (error) { console.warn("Sesi tidak dipulihkan:", error.message); }
+
+// FITUR PEMULIHAN PASSWORD SUPER ADMIN
+const recoveryButton = document.createElement("button");
+recoveryButton.type = "button";
+recoveryButton.textContent = "Lupa Password Super Admin?";
+recoveryButton.className = "small-link";
+recoveryButton.style.marginTop = "12px";
+
+const loginForm = $("loginForm");
+loginForm.insertAdjacentElement("afterend", recoveryButton);
+
+recoveryButton.onclick = async () => {
+  const email = prompt(
+    "Masukkan Gmail Super Admin:",
+    "zidanegamal15@gmail.com"
+  );
+
+  if (!email) return;
+
+  try {
+    const { error } = await db.auth.resetPasswordForEmail(
+      email.trim(),
+      {
+        redirectTo:
+          "https://zidanegamal15-tech.github.io/PT.MEDICAL-PRIMA-UTAMA/"
+      }
+    );
+
+    if (error) throw error;
+
+    alert("Link pemulihan password telah dikirim ke Gmail.");
+
+  } catch (error) {
+    alert("Gagal mengirim pemulihan: " + error.message);
+  }
+};
+
+// PROSES PASSWORD BARU
+db.auth.onAuthStateChange((event) => {
+  if (event === "PASSWORD_RECOVERY") {
+    setTimeout(async () => {
+      const newPassword = prompt("Masukkan password baru:");
+
+      if (!newPassword) return;
+
+      if (newPassword.length < 8) {
+        alert("Password minimal 8 karakter.");
+        return;
+      }
+
+      const { error } = await db.auth.updateUser({
+        password: newPassword
+      });
+
+      if (error) {
+        alert("Gagal memperbarui password: " + error.message);
+      } else {
+        alert("Password Super Admin berhasil diperbarui!");
+        await db.auth.signOut();
+        location.reload();
+      }
+    }, 500);
+  }
+});
 </script>
 </body></html>
