@@ -600,10 +600,26 @@ async function refreshProjectContractTotal(projectId){
 }
 async function openProjectDetail(projectId){const project=moduleCache.projects.find(x=>String(x.id)===String(projectId));if(!project)return alert('Data proyek tidak ditemukan. Muat ulang halaman lalu coba lagi.');activeProjectForItems=project;$('projectDetailTitle').textContent=project.name||'Detail proyek';$('projectDetailMeta').textContent=[project.project_code,project.client_name,project.location].filter(Boolean).join(' · ');$('projectDetailModal').classList.add('show');$('projectDetailModal').setAttribute('aria-hidden','false');await loadProjectItems();}
 let removedProjectItemIds=[];
+function parseIndonesianNumber(value){
+ const raw=String(value??'').trim().replace(/\s/g,'').replace(/[^0-9,.-]/g,'');
+ if(!raw)return 0;
+ const comma=raw.lastIndexOf(','),dot=raw.lastIndexOf('.');
+ let normalized=raw;
+ if(comma>=0&&dot>=0){
+  normalized=comma>dot?raw.replace(/\./g,'').replace(',','.'):raw.replace(/,/g,'');
+ }else if(comma>=0){
+  normalized=raw.replace(/\./g,'').replace(',','.');
+ }else if(dot>=0){
+  const decimals=raw.length-dot-1;
+  if(decimals===3)normalized=raw.replace(/\./g,'');
+ }
+ const number=Number(normalized);
+ return Number.isFinite(number)?number:NaN;
+}
 function projectItemRow(item={}){
  const tr=document.createElement('tr');tr.dataset.itemId=item.id||'';
- const fields=[['item_name',item.item_name||'','text','Nama produk'],['unit',item.unit||'','text','Satuan'],['volume',item.volume??'','number','0.0001'],['unit_price',item.unit_price??'','number','0.01'],['tax_percent',item.tax_percent??'','number','0.01']];
- tr.innerHTML=fields.map(([name,value,type,placeholder])=>'<td><input data-item-field="'+name+'" type="'+type+'" '+(type==='number'?'min="0" step="'+placeholder+'"':'placeholder="'+placeholder+'"')+' value="'+escapeHtml(value)+'" style="min-width:'+(name==='item_name'?'190px':'90px')+';width:100%"></td>').join('')+'<td class="item-total">Rp 0</td><td><button type="button" class="danger" data-remove-item>Hapus</button></td>';
+ const fields=[['item_name',item.item_name||'','text','Nama produk'],['unit',item.unit||'','text','Satuan'],['volume',item.volume??'','number','0.0001'],['unit_price',item.unit_price??'','text','Contoh 57.389,64'],['tax_percent',item.tax_percent??'','number','0.01']];
+ tr.innerHTML=fields.map(([name,value,type,placeholder])=>'<td><input data-item-field="'+name+'" type="'+type+'" '+(type==='number'?'min="0" step="'+placeholder+'"':'placeholder="'+placeholder+'"')+' '+(name==='unit_price'?'inputmode="decimal" autocomplete="off"':'')+' value="'+escapeHtml(value)+'" style="min-width:'+(name==='item_name'?'190px':'90px')+';width:100%"></td>').join('')+'<td class="item-total">Rp 0</td><td><button type="button" class="danger" data-remove-item>Hapus</button></td>';
  tr.querySelector('[data-remove-item]').onclick=()=>{if(tr.dataset.itemId)removedProjectItemIds.push(tr.dataset.itemId);tr.remove();updateProjectBulkSubtotal();};
  tr.querySelectorAll('input').forEach(input=>input.addEventListener('input',updateProjectBulkSubtotal));
  return tr;
@@ -611,7 +627,7 @@ function projectItemRow(item={}){
 function updateProjectBulkSubtotal(){
  let subtotal=0;
  document.querySelectorAll('#projectItemsRows tr[data-item-id]').forEach(tr=>{
-  const val=n=>Number(tr.querySelector('[data-item-field="'+n+'"]')?.value)||0;
+  const val=n=>{const raw=tr.querySelector('[data-item-field="'+n+'"]')?.value;const parsed=n==='unit_price'?parseIndonesianNumber(raw):Number(raw);return Number.isFinite(parsed)?parsed:0;};
   const base=val('volume')*val('unit_price'),line=base+(base*val('tax_percent')/100);subtotal+=line;
   const cell=tr.querySelector('.item-total');if(cell)cell.textContent=formatRp(line);
  });
@@ -644,7 +660,7 @@ $('saveAllProjectItems').addEventListener('click',async()=>{
  const btn=$('saveAllProjectItems'),rows=[...document.querySelectorAll('#projectItemsRows tr[data-item-id]')],payloads=[];
  for(const [i,tr] of rows.entries()){
   const get=n=>tr.querySelector('[data-item-field="'+n+'"]').value.trim();
-  const item_name=get('item_name'),unit=get('unit'),volume=Number(get('volume')),unit_price=Number(get('unit_price')),tax_percent=get('tax_percent')===''?0:Number(get('tax_percent'));
+  const item_name=get('item_name'),unit=get('unit'),volume=Number(get('volume')),unit_price=parseIndonesianNumber(get('unit_price')),tax_percent=get('tax_percent')===''?0:Number(get('tax_percent'));
   if(!item_name&&!unit&&!get('volume')&&!get('unit_price'))continue;
   if(!item_name||!unit||!Number.isFinite(volume)||volume<=0||!Number.isFinite(unit_price)||unit_price<0||!Number.isFinite(tax_percent)||tax_percent<0||tax_percent>100)return alert('Periksa baris '+(i+1)+': nama produk, satuan, volume, harga, dan pajak (0–100%) wajib diisi dengan benar.');
   payloads.push({id:tr.dataset.itemId||null,project_id:activeProjectForItems.id,item_name,unit,volume,unit_price,tax_percent});
