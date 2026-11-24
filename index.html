@@ -622,7 +622,7 @@ function updateProjectBulkSubtotal(){
 }
 async function loadProjectItems(){
  if(!activeProjectForItems)return;
- const body=$('projectItemsRows');body.innerHTML='<tr><td colspan="6" class="empty">Memuat rincian proyek…</td></tr>';removedProjectItemIds=[];
+ const body=$('projectItemsRows');body.innerHTML='<tr><td colspan="7" class="empty">Memuat rincian proyek…</td></tr>';removedProjectItemIds=[];
  try{
   const {data,error}=await db.from('project_items').select('*').eq('project_id',activeProjectForItems.id).order('created_at',{ascending:true});if(error)throw error;
   body.innerHTML='';
@@ -636,7 +636,7 @@ async function loadProjectItems(){
   $('saveAllProjectItems').style.display=canEdit()?'inline-flex':'none';
   $('addProjectItem').style.display=canEdit()?'inline-flex':'none';
   updateProjectBulkSubtotal();
- }catch(err){body.innerHTML='<tr><td colspan="6" class="empty">Rincian belum dapat dimuat. Pastikan tabel project_items sudah dibuat.</td></tr>';console.warn('load project items',err);}
+ }catch(err){body.innerHTML='<tr><td colspan="7" class="empty">Rincian belum dapat dimuat. Pastikan tabel project_items sudah dibuat.</td></tr>';console.warn('load project items',err);}
 }
 $('addProjectItem').addEventListener('click',()=>{const tr=projectItemRow();$('projectItemsRows').appendChild(tr);});
 $('saveAllProjectItems').addEventListener('click',async()=>{
