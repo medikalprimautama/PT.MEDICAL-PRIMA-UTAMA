@@ -131,7 +131,7 @@ button,input,select{font:inherit}button{cursor:pointer;border:0;border-radius:10
    <div class="view" id="view-users"><div class="module-head"><div><div class="eyebrow">ADMINISTRASI SISTEM</div><h2 class="section-title">Manajemen Pengguna</h2><p class="module-desc">Lihat akun terdaftar, peran, dan status akses sistem.</p></div><button class="secondary" id="refreshUsers">↻ Muat ulang</button></div><div class="panel"><div class="table-wrap"><table><thead><tr><th>Nama</th><th>Username</th><th>Peran</th><th>Status persetujuan</th><th>Status akun</th></tr></thead><tbody id="usersRows"><tr><td colspan="5" class="empty">Memuat data…</td></tr></tbody></table></div></div></div>
    <div class="modalback" id="dataModal"><div class="modal"><div class="panel-head"><h2 id="dataModalTitle">Tambah data</h2><button type="button" class="icon-btn" id="closeDataModal">✕</button></div><form id="dataForm"><div class="fields" id="dataFields"></div><div class="actions"><button type="button" class="secondary" id="cancelDataModal">Batal</button><button class="primary" type="submit">Simpan data</button></div></form></div></div>
    <div class="modalback" id="passwordModal" aria-hidden="true"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="passwordModalTitle" style="width:min(480px,100%)"><div class="panel-head"><div><h2 id="passwordModalTitle">Ubah kata sandi</h2><p class="module-desc">Informasi akun dan pengaturan kata sandi.</p></div><button type="button" class="icon-btn" id="closePasswordModal" aria-label="Tutup">✕</button></div><div class="panel" style="margin:12px 0;padding:14px"><div class="rowline"><span class="muted">Nama</span><b id="profileFullName">—</b></div><div class="rowline"><span class="muted">Username</span><b id="profileUsername">—</b></div><div class="rowline"><span class="muted">Email akun</span><b id="profileEmail">—</b></div><div class="rowline"><span class="muted">Jabatan / Role</span><b id="profileRole">—</b></div></div><form id="passwordForm"><div class="field"><label for="newPassword">Kata sandi baru</label><input id="newPassword" type="password" autocomplete="new-password" minlength="8" required placeholder="Minimal 8 karakter"></div><div class="field"><label for="confirmPassword">Konfirmasi kata sandi baru</label><input id="confirmPassword" type="password" autocomplete="new-password" minlength="8" required placeholder="Ulangi kata sandi baru"></div><div class="notice">Gunakan kata sandi yang kuat dan jangan membagikannya kepada orang lain. Setelah berhasil, gunakan kata sandi baru saat login berikutnya.</div><div class="actions"><button type="button" class="secondary" id="cancelPasswordModal">Batal</button><button type="submit" class="primary" id="savePasswordButton">Simpan kata sandi</button></div></form></div></div>
-   <div class="modalback" id="projectDetailModal" aria-hidden="true"><div class="modal" style="width:min(1100px,96vw);max-height:90vh;overflow:auto"><div class="panel-head"><div><h2 id="projectDetailTitle">Detail proyek</h2><p id="projectDetailMeta" class="module-desc"></p></div><button type="button" class="icon-btn" id="closeProjectDetail">✕</button></div><div class="panel" style="margin:12px 0"><div class="panel-head"><h3>Daftar barang / pekerjaan</h3><button type="button" class="primary" id="addProjectItem">+ Tambah item</button></div><div class="table-wrap"><table><thead id="projectItemsHead"><tr><th>Nama barang / pekerjaan</th><th>Satuan</th><th>Volume</th><th>Harga satuan</th><th>Total harga</th><th>Aksi</th></tr></thead><tbody id="projectItemsRows"><tr><td colspan="6" class="empty">Memuat rincian…</td></tr></tbody></table></div><div id="projectCostSummary" style="margin-top:16px;display:flex;justify-content:flex-end"><div style="width:min(460px,100%);border:1px solid var(--line);border-radius:10px;overflow:hidden"><div style="display:flex;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--line)"><span>Subtotal</span><strong id="projectSubtotal">Rp 0</strong></div><div style="padding:8px 14px;text-align:right"><button type="button" class="secondary" id="editProjectCosts" style="display:none">Atur PPN & Ongkir</button></div><div id="projectPpnRow" style="display:none;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:1px solid var(--line)"><label for="projectPpnInput">PPN (%)</label><div style="display:flex;align-items:center;gap:10px"><input id="projectPpnInput" type="number" min="0" max="100" step="0.01" style="width:105px;padding:7px" placeholder="Opsional"><strong id="projectPpnAmount">Rp 0</strong></div></div><div id="projectShippingRow" style="display:none;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:1px solid var(--line)"><label for="projectShippingInput">Ongkir (Rp)</label><div style="display:flex;align-items:center;gap:10px"><input id="projectShippingInput" type="number" min="0" step="0.01" style="width:150px;padding:7px" placeholder="Opsional"></div></div><div style="display:flex;justify-content:space-between;padding:12px 14px;font-weight:800"><span>TOTAL</span><strong id="projectItemsGrandTotal">Rp 0</strong></div><div style="padding:0 14px 12px;text-align:right"><button type="button" class="secondary" id="saveProjectCosts" style="display:none">Simpan PPN & Ongkir</button></div></div></div></div><div class="actions"><button type="button" class="secondary" id="closeProjectDetailBottom">Tutup</button></div></div></div>
+   <div class="modalback" id="projectDetailModal" aria-hidden="true"><div class="modal" style="width:min(1100px,96vw);max-height:90vh;overflow:auto"><div class="panel-head"><div><h2 id="projectDetailTitle">Detail proyek</h2><p id="projectDetailMeta" class="module-desc"></p></div><button type="button" class="icon-btn" id="closeProjectDetail">✕</button></div><div class="panel" style="margin:12px 0"><div class="panel-head"><h3>Daftar barang / pekerjaan</h3><div class="actions"><button type="button" class="secondary" id="addProjectItem">+ Tambah baris</button><button type="button" class="primary" id="saveAllProjectItems">Simpan semua barang</button></div></div><div class="table-wrap"><table><thead id="projectItemsHead"><tr><th>Nama barang / pekerjaan</th><th>Satuan</th><th>Volume</th><th>Harga satuan</th><th>Total harga</th><th>Aksi</th></tr></thead><tbody id="projectItemsRows"><tr><td colspan="6" class="empty">Memuat rincian…</td></tr></tbody></table></div><div id="projectCostSummary" style="margin-top:16px;display:flex;justify-content:flex-end"><div style="width:min(460px,100%);border:1px solid var(--line);border-radius:10px;overflow:hidden"><div style="display:flex;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--line)"><span>Subtotal</span><strong id="projectSubtotal">Rp 0</strong></div><div style="padding:8px 14px;text-align:right"><button type="button" class="secondary" id="editProjectCosts" style="display:none">Atur PPN & Ongkir</button></div><div id="projectPpnRow" style="display:none;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:1px solid var(--line)"><label for="projectPpnInput">PPN (%)</label><div style="display:flex;align-items:center;gap:10px"><input id="projectPpnInput" type="number" min="0" max="100" step="0.01" style="width:105px;padding:7px" placeholder="Opsional"><strong id="projectPpnAmount">Rp 0</strong></div></div><div id="projectShippingRow" style="display:none;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:1px solid var(--line)"><label for="projectShippingInput">Ongkir (Rp)</label><div style="display:flex;align-items:center;gap:10px"><input id="projectShippingInput" type="number" min="0" step="0.01" style="width:150px;padding:7px" placeholder="Opsional"></div></div><div style="display:flex;justify-content:space-between;padding:12px 14px;font-weight:800"><span>TOTAL</span><strong id="projectItemsGrandTotal">Rp 0</strong></div><div style="padding:0 14px 12px;text-align:right"><button type="button" class="secondary" id="saveProjectCosts" style="display:none">Simpan PPN & Ongkir</button></div></div></div></div><div class="actions"><button type="button" class="secondary" id="closeProjectDetailBottom">Tutup</button></div></div></div>
    <div class="modalback" id="projectItemModal" aria-hidden="true"><div class="modal"><div class="panel-head"><h2 id="projectItemModalTitle">Tambah item proyek</h2><button type="button" class="icon-btn" id="closeProjectItemModal">✕</button></div><form id="projectItemForm"><div class="fields"><div class="field full"><label>Nama barang / pekerjaan</label><input name="item_name" required maxlength="200"></div><div class="field"><label>Satuan</label><input name="unit" required placeholder="Unit / Paket / Set"></div><div class="field"><label>Volume</label><input name="volume" type="number" min="0.0001" step="0.0001" required></div><div class="field full"><label>Harga satuan (Rp)</label><input name="unit_price" type="number" min="0" step="0.01" required></div></div><div class="actions"><button type="button" class="secondary" id="cancelProjectItem">Batal</button><button type="submit" class="primary">Simpan item</button></div></form></div></div>
 
   </div>
@@ -599,29 +599,69 @@ async function refreshProjectContractTotal(projectId){
  return amounts.total;
 }
 async function openProjectDetail(projectId){const project=moduleCache.projects.find(x=>String(x.id)===String(projectId));if(!project)return alert('Data proyek tidak ditemukan. Muat ulang halaman lalu coba lagi.');activeProjectForItems=project;$('projectDetailTitle').textContent=project.name||'Detail proyek';$('projectDetailMeta').textContent=[project.project_code,project.client_name,project.location].filter(Boolean).join(' · ');$('projectDetailModal').classList.add('show');$('projectDetailModal').setAttribute('aria-hidden','false');await loadProjectItems();}
+let removedProjectItemIds=[];
+function projectItemRow(item={}){
+ const tr=document.createElement('tr');tr.dataset.itemId=item.id||'';
+ const fields=[['item_name',item.item_name||'','text','Nama produk'],['unit',item.unit||'','text','Satuan'],['volume',item.volume??'','number','0.0001'],['unit_price',item.unit_price??'','number','0.01']];
+ tr.innerHTML=fields.map(([name,value,type,placeholder])=>'<td><input data-item-field="'+name+'" type="'+type+'" '+(type==='number'?'min="0" step="'+placeholder+'"':'placeholder="'+placeholder+'"')+' value="'+escapeHtml(value)+'" style="min-width:'+(name==='item_name'?'190px':'90px')+';width:100%"></td>').join('')+'<td class="item-total">Rp 0</td><td><button type="button" class="danger" data-remove-item>Hapus</button></td>';
+ tr.querySelector('[data-remove-item]').onclick=()=>{if(tr.dataset.itemId)removedProjectItemIds.push(tr.dataset.itemId);tr.remove();updateProjectBulkSubtotal();};
+ tr.querySelectorAll('input').forEach(input=>input.addEventListener('input',updateProjectBulkSubtotal));
+ return tr;
+}
+function updateProjectBulkSubtotal(){
+ let subtotal=0;
+ document.querySelectorAll('#projectItemsRows tr[data-item-id]').forEach(tr=>{
+  const val=n=>Number(tr.querySelector('[data-item-field="'+n+'"]')?.value)||0;
+  const line=val('volume')*val('unit_price');subtotal+=line;
+  const cell=tr.querySelector('.item-total');if(cell)cell.textContent=formatRp(line);
+ });
+ const costs=projectCosts(activeProjectForItems,subtotal);
+ $('projectSubtotal').textContent=formatRp(subtotal);
+ $('projectPpnAmount').textContent=formatRp(costs.ppn);
+ $('projectItemsGrandTotal').textContent=formatRp(costs.total);
+}
 async function loadProjectItems(){
  if(!activeProjectForItems)return;
- const body=$('projectItemsRows');body.innerHTML='<tr><td colspan="6" class="empty">Memuat rincian proyek…</td></tr>';
+ const body=$('projectItemsRows');body.innerHTML='<tr><td colspan="6" class="empty">Memuat rincian proyek…</td></tr>';removedProjectItemIds=[];
  try{
   const {data,error}=await db.from('project_items').select('*').eq('project_id',activeProjectForItems.id).order('created_at',{ascending:true});if(error)throw error;
-  const rows=data||[];
-  body.innerHTML=rows.length?rows.map(item=>'<tr><td>'+escapeHtml(item.item_name)+'</td><td>'+escapeHtml(item.unit)+'</td><td>'+Number(item.volume).toLocaleString('id-ID')+'</td><td>'+formatRp(item.unit_price)+'</td><td class="item-total">'+formatRp(projectItemBase(item))+'</td><td>'+(canEdit()?'<div class="actions"><button class="secondary" data-item-edit="'+escapeHtml(item.id)+'">Edit</button><button class="danger" data-item-delete="'+escapeHtml(item.id)+'">Hapus</button></div>':'—')+'</td></tr>').join(''):'<tr><td colspan="6" class="empty">Belum ada barang atau pekerjaan pada proyek ini.</td></tr>';
-  body.querySelectorAll('[data-item-edit]').forEach(b=>b.onclick=()=>openProjectItemForm(rows.find(x=>String(x.id)===b.dataset.itemEdit)));
-  body.querySelectorAll('[data-item-delete]').forEach(b=>b.onclick=()=>deleteProjectItem(b.dataset.itemDelete));
-  const subtotal=rows.reduce((sum,x)=>sum+projectItemBase(x),0);
-  const amounts=projectCosts(activeProjectForItems,subtotal);
-  $('projectSubtotal').textContent=formatRp(subtotal);
+  body.innerHTML='';
+  (data||[]).forEach(item=>body.appendChild(projectItemRow(item)));
+  if(!data?.length)body.appendChild(projectItemRow());
   $('projectPpnInput').value=Number(activeProjectForItems.ppn_percent)>0?activeProjectForItems.ppn_percent:'';
   $('projectShippingInput').value=Number(activeProjectForItems.shipping_cost)>0?activeProjectForItems.shipping_cost:'';
-  $('projectPpnAmount').textContent=formatRp(amounts.ppn);
-  $('projectItemsGrandTotal').textContent=formatRp(amounts.total);
   $('projectPpnRow').style.display=Number(activeProjectForItems.ppn_percent)>0?'flex':'none';
   $('projectShippingRow').style.display=Number(activeProjectForItems.shipping_cost)>0?'flex':'none';
-  $('editProjectCosts').style.display=canEdit()?'inline-flex':'none';$('saveProjectCosts').style.display='none';
-  const projectIndex=moduleCache.projects.findIndex(x=>x.id===activeProjectForItems.id);
-  if(projectIndex>=0){moduleCache.projects[projectIndex].contract_value=amounts.total;renderModule('projects');}
+  $('editProjectCosts').style.display=canEdit()?'inline-flex':'none';
+  $('saveAllProjectItems').style.display=canEdit()?'inline-flex':'none';
+  $('addProjectItem').style.display=canEdit()?'inline-flex':'none';
+  updateProjectBulkSubtotal();
  }catch(err){body.innerHTML='<tr><td colspan="6" class="empty">Rincian belum dapat dimuat. Pastikan tabel project_items sudah dibuat.</td></tr>';console.warn('load project items',err);}
 }
+$('addProjectItem').addEventListener('click',()=>{const tr=projectItemRow();$('projectItemsRows').appendChild(tr);});
+$('saveAllProjectItems').addEventListener('click',async()=>{
+ if(!canEdit()||!activeProjectForItems)return;
+ const btn=$('saveAllProjectItems'),rows=[...document.querySelectorAll('#projectItemsRows tr[data-item-id]')],payloads=[];
+ for(const [i,tr] of rows.entries()){
+  const get=n=>tr.querySelector('[data-item-field="'+n+'"]').value.trim();
+  const item_name=get('item_name'),unit=get('unit'),volume=Number(get('volume')),unit_price=Number(get('unit_price'));
+  if(!item_name&&!unit&&!get('volume')&&!get('unit_price'))continue;
+  if(!item_name||!unit||!Number.isFinite(volume)||volume<=0||!Number.isFinite(unit_price)||unit_price<0)return alert('Periksa baris '+(i+1)+': nama produk, satuan, volume, dan harga wajib diisi dengan benar.');
+  payloads.push({id:tr.dataset.itemId||null,project_id:activeProjectForItems.id,item_name,unit,volume,unit_price});
+ }
+ setBusy(btn,true,'Menyimpan…');
+ try{
+  for(const id of removedProjectItemIds){const {error}=await db.from('project_items').delete().eq('id',id);if(error)throw error;}
+  for(const item of payloads){
+   if(item.id){const {id,...update}=item;const {error}=await db.from('project_items').update(update).eq('id',id);if(error)throw error;}
+   else{const {id,...insert}=item;const {error}=await db.from('project_items').insert({...insert,created_by:currentUser.id});if(error)throw error;}
+  }
+  await refreshProjectContractTotal(activeProjectForItems.id);
+  await loadProjectItems();await loadModule('projects');await refreshDashboard();await refreshReportsIfVisible();
+  alert('Seluruh barang/produk berhasil disimpan.');
+ }catch(err){notifyError(err,'Gagal menyimpan daftar barang. Periksa koneksi database dan kolom project_items.');}
+ finally{setBusy(btn,false);}
+});
 $('editProjectCosts').addEventListener('click',()=>{const show=$('projectPpnRow').style.display==='none'&&$('projectShippingRow').style.display==='none';$('projectPpnRow').style.display=show||Number($('projectPpnInput').value)>0?'flex':'flex';$('projectShippingRow').style.display='flex';$('saveProjectCosts').style.display='inline-flex';$('editProjectCosts').style.display='none';});
 $('saveProjectCosts').addEventListener('click',async()=>{
  if(!canEdit()||!activeProjectForItems)return;
